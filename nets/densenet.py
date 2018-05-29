@@ -29,14 +29,12 @@ def block(net, layers, growth, scope='block'):
         net = tf.concat(axis=3, values=[net, tmp])
     return net
 
-def transition(net, num_outputs, scope='transition'):
-    net = bn_act_conv_drp(net, num_outputs, [1, 1], scope=scope + '_conv1x1')
-    net = slim.avg_pool2d(net, [2, 2], stride=2, scope=scope + '_avgpool')
-    return net
+
 def densenet(images, num_classes=1001, is_training=False,
              dropout_keep_prob=0.8,
              scope='densenet'):
     """Creates a variant of the densenet model.
+
       images: A batch of `Tensors` of size [batch_size, height, width, channels].
       num_classes: the number of classes in the dataset.
       is_training: specifies whether or not we're currently training the model.
@@ -44,18 +42,17 @@ def densenet(images, num_classes=1001, is_training=False,
       dropout_keep_prob: the percentage of activation values that are retained.
       prediction_fn: a function to get predictions out of logits.
       scope: Optional variable_scope.
+
     Returns:
       logits: the pre-softmax activations, a tensor of size
         [batch_size, `num_classes`]
       end_points: a dictionary from components of the network to the corresponding
         activation.
     """
-    #growth = 24
-    growth = 32
+    growth = 24
     compression_rate = 0.5
 
     def reduce_dim(input_feature):
-
         return int(int(input_feature.shape[-1]) * compression_rate)
 
     end_points = {}
@@ -66,33 +63,31 @@ def densenet(images, num_classes=1001, is_training=False,
             pass
             ##########################
             # Put your code here.
-            #这里我使用论文里提到的dense121网络结构
-            print(images.shape)
-            net = images
-            net = slim.conv2d(net, 2 * growth, 7, stride=2, scope='conv1')
-            net = slim.max_pool2d(net, 3, stride=2, padding='SAME', scope='pool1')
+            current1 = end_points['pre_conv2'] = slim.conv2d(images, 2*growth, [7, 7], stride=2, padding='same', scope='pre_conv2')
+            current1 = end_points['pre_pool2'] = slim.max_pool2d(current1, [3, 3], stride=2, scope='pre_pool2')
 
-            net = block(net, 2, growth, scope='block1')
-            net = transition(net, reduce_dim(net), scope='transition1')
+            current1 = end_points['block1'] = block(current1, 12, growth, scope='lblock1')
+            
+            current1 = end_points['transition1_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition1_conv2')
+            current1 = end_points['transition1_pool2'] = slim.avg_pool2d(curren1t, [2, 2], stride=2, scope='transition1_pool2') 
+            
+            current1 = end_points['block2'] = block(current1, 12, growth, scope='lblock2')
+            
+            current1 = end_points['transition2_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition2_conv2')
+            current1 = end_points['transition2_pool2'] = slim.avg_pool2d(current1, [2, 2], stride=2, scope='transition2_pool2') 
+            
+            current1 = end_points['block3'] = block(curren1t, 12, growth, scope='myblock3')
 
-            net = block(net, 4, growth, scope='block2')
-            net = transition(net, reduce_dim(net), scope='transition2')
+            current1 = end_points['transition3_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition3_conv2')
+            current1 = end_points['transition3_pool2'] = slim.avg_pool2d(current1, [2, 2], stride=2, scope='transition3_pool2') 
 
-            net = block(net, 6, growth, scope='block3')
-            net = slim.batch_norm(net, scope='last_batch_norm_relu')
-            net = tf.nn.relu(net)
+            current1 = end_points['block4'] = block(current1, 12, growth, scope='lblock3')	
+            
+            current1 = end_points['global_pool2'] = slim.avg_pool2d(current1, [6, 6], scope='lglobal_pool2') 
+            current1 = end_points['PreLogitsFlatten'] = slim.flatten(current1, scope='PreLogitsFlatten')
+            logits = end_points['Logits'] = slim.fully_connected(current1, num_classes, activation_fn=None, scope='lLogits')
 
-            # Global average pooling.
-            net = tf.reduce_mean(net, [1, 2], name='pool2', keep_dims=True)
-
-            biases_initializer = tf.constant_initializer(0.1)
-            net = slim.conv2d(net, num_classes, [1, 1], biases_initializer=biases_initializer, scope='logits')
-
-            logits = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
-            print(logits)
-            end_points['Logits'] = logits
-            end_points['predictions'] = slim.softmax(logits, scope='predictions')
-            print("#############end#############")
+            end_points['Predictions'] = tf.nn.softmax(logits, name='Predictions')
             ##########################
 
     return logits, end_points
@@ -111,8 +106,10 @@ def bn_drp_scope(is_training=True, keep_prob=0.8):
 
 def densenet_arg_scope(weight_decay=0.004):
     """Defines the default densenet argument scope.
+
     Args:
       weight_decay: The weight decay to use for regularizing the model.
+
     Returns:
       An `arg_scope` to use for the inception v3 model.
     """
