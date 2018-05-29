@@ -1,4 +1,4 @@
-**--clone_on_cpu=True
+#**--clone_on_cpu=True
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -17,7 +17,7 @@ def parse_args(check=True):
     parser.add_argument('--checkpoint_exclude_scopes', type=str, default='InceptionV4/Logits,InceptionV4/AuxLogits/Aux_logits')
     parser.add_argument('--train_dir', type=str)
     parser.add_argument('--learning_rate', type=float, default=0.001)
-    parser.add_argument('--clone_on_cpu', type=bool, default=False)
+    parser.add_argument('--clone_on_cpu', type=bool, default=True)
     parser.add_argument('--optimizer', type=str, default='rmsprop')
     parser.add_argument('--batch_size', type=int, default=32)
 
