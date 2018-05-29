@@ -69,7 +69,7 @@ def densenet(images, num_classes=1001, is_training=False,
             current1 = end_points['block1'] = block(current1, 12, growth, scope='lblock1')
             
             current1 = end_points['transition1_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition1_conv2')
-            current1 = end_points['transition1_pool2'] = slim.avg_pool2d(curren1t, [2, 2], stride=2, scope='transition1_pool2') 
+            current1 = end_points['transition1_pool2'] = slim.avg_pool2d(current1, [2, 2], stride=2, scope='transition1_pool2') 
             
             current1 = end_points['block2'] = block(current1, 12, growth, scope='lblock2')
             
