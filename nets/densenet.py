@@ -1,5 +1,5 @@
 """Contains a variant of the densenet model definition."""
-#具体运行结果见https://www.tinymind.com/executions/dsqrrygg
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
