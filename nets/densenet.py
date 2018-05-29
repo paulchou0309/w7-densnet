@@ -63,7 +63,7 @@ def densenet(images, num_classes=1001, is_training=False,
             pass
             ##########################
             # Put your code here.
-            current = end_points['pre_conv2'] = slim.conv2d(images, 2*growth, [7, 7], stride=2, padding='same', scope='pre_conv2')
+            """current = end_points['pre_conv2'] = slim.conv2d(images, 2*growth, [7, 7], stride=2, padding='same', scope='pre_conv2')
             current = end_points['pre_pool2'] = slim.max_pool2d(current, [3, 3], stride=2, scope='pre_pool2')
 
             current = end_points['block1'] = block(current, 12, growth, scope='lblock1')
@@ -87,7 +87,31 @@ def densenet(images, num_classes=1001, is_training=False,
             current = end_points['PreLogitsFlatten'] = slim.flatten(current, scope='PreLogitsFlatten')
             logits = end_points['Logits'] = slim.fully_connected(current, num_classes, activation_fn=None, scope='lLogits')
 
-            end_points['Predictions'] = tf.nn.softmax(logits, name='Predictions')
+            end_points['Predictions'] = tf.nn.softmax(logits, name='Predictions')"""
+            net = images
+            net = slim.conv2d(net, 2 * growth, 7, stride=2, scope='conv1')
+            net = slim.max_pool2d(net, 3, stride=2, padding='SAME', scope='pool1')
+
+            net = block(net, 2, growth, scope='block1')
+            net = transition(net, reduce_dim(net), scope='transition1')
+
+            net = block(net, 4, growth, scope='block2')
+            net = transition(net, reduce_dim(net), scope='transition2')
+
+            net = block(net, 6, growth, scope='block3')
+            net = slim.batch_norm(net, scope='last_batch_norm_relu')
+            net = tf.nn.relu(net)
+
+            # Global average pooling.
+            net = tf.reduce_mean(net, [1, 2], name='pool2', keep_dims=True)
+
+            biases_initializer = tf.constant_initializer(0.1)
+            net = slim.conv2d(net, num_classes, [1, 1], biases_initializer=biases_initializer, scope='logits')
+
+            logits = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
+            print(logits)
+            end_points['Logits'] = logits
+            end_points['predictions'] = slim.softmax(logits, scope='predictions')
             ##########################
 
     return logits, end_points
