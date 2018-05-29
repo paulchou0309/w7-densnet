@@ -76,7 +76,7 @@ def densenet(images, num_classes=1001, is_training=False,
             current1 = end_points['transition2_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition2_conv2')
             current1 = end_points['transition2_pool2'] = slim.avg_pool2d(current1, [2, 2], stride=2, scope='transition2_pool2') 
             
-            current1 = end_points['block3'] = block(curren1t, 12, growth, scope='myblock3')
+            current1 = end_points['block3'] = block(current1, 12, growth, scope='myblock3')
 
             current1 = end_points['transition3_conv2'] = bn_act_conv_drp(current1, growth, [1, 1], scope='transition3_conv2')
             current1 = end_points['transition3_pool2'] = slim.avg_pool2d(current1, [2, 2], stride=2, scope='transition3_pool2') 
