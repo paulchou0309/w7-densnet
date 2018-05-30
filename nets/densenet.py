@@ -61,8 +61,8 @@ def densenet(images, num_classes=1001, is_training=False,
         with slim.arg_scope(bn_drp_scope(is_training=is_training,
                                          keep_prob=dropout_keep_prob)) as ssc:
             
-            #  pass
-            #print('###########train#####################')#这句打开之后，就会报错
+          #这里使用的均为论文里的参数
+        
             scope = 'conv1'
             net = slim.conv2d(images, 2*growth, [7, 7], stride = 2,scope= scope)
             end_points[scope]=  net
