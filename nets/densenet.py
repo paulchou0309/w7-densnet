@@ -1,3 +1,5 @@
+"""Contains a variant of the densenet model definition."""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -112,10 +114,7 @@ def densenet(images, num_classes=1001, is_training=False,
             aux = slim.avg_pool2d(aux,aux.shape[1:3])
             aux = slim.flatten(aux)
             aux_logits = slim.fully_connected(aux,num_classes,activation_fn=None,scope = 'AuxLogits')
-#            print(scope)
-#            print('net shape0:%d'% aux_logits.get_shape().as_list()[0])
-#            print('tmp shape1:%d'% aux_logits.get_shape().as_list()[1])
-#          #  print('tmp shape2:%d'% aux_logits.get_shape().as_list()[2])
+
             end_points[scope]=  aux_logits
             ######
             scope = 'block4'
